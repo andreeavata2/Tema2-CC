@@ -76,7 +76,7 @@
 ## replaceAllStudents
 
 * Select Method [PUT] in postman.
-* Add the following URL: http://localhost:5000/students/ + id of student
+* Add the following URL: http://localhost:5000/students
 
 {
 	"data": 

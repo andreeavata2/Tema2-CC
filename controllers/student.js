@@ -37,7 +37,6 @@ module.exports.insertStudent = async(res, body) => {
     } catch (err) {
         return Helpers.handleError(res, { msg: err }, 500)
     }
-    // return Helpers.handleError(res, { msg: 'Not found222' }, 404)
 }
 
 module.exports.deleteStudentById = async(res, id) => {
@@ -107,7 +106,6 @@ module.exports.updatePatch = async(res, body, id) => {
 
     if (student) {
         try {
-            console.log(id, tempUser)
             const studentPatch = await db.findByIdAndUpdate(id, tempUser, { useFindAndModify: false });
             return Helpers.handleSuccess(res, { data: `student with id: ${id} successfully updated` }, 200)
         } catch (err) {
@@ -142,11 +140,10 @@ module.exports.putUpdate = async(res, body, id) => {
 
     if (student) {
         try {
-            console.log(id, body)
             const studentPut = await db.findByIdAndUpdate(id, body, { useFindAndModify: false });
             return Helpers.handleSuccess(res, { data: `student with id: ${id} successfully updated` }, 200)
         } catch (err) {
-            return Helpers.handleError(res, { msg: 'error at put : Student not found in DB' }, 404)
+            return Helpers.handleError(res, { msg: err.errmsg || 'error at put with id' }, 404)
         }
     } else {
         return Helpers.handleError(res, { msg: 'error at put' }, 404)
@@ -155,8 +152,7 @@ module.exports.putUpdate = async(res, body, id) => {
 
 module.exports.updatePatchAllStudents = async(res, body) => {
     body = JSON.parse(body);
-    console.log(body);
-
+    body = body.bursary;
     var students;
     try {
         students = await db.find({})
@@ -165,7 +161,6 @@ module.exports.updatePatchAllStudents = async(res, body) => {
     }
 
     var newBursary;
-    console.log(students);
     if (students.length > 0) {
         try {
             students.forEach(async(stud) => {
@@ -183,19 +178,42 @@ module.exports.updatePatchAllStudents = async(res, body) => {
     }
 }
 
-// module.exports.putAllStudents = async(res, body) => {
-//     body = JSON.parse(body);
-//     console.log(body);
+module.exports.putAllStudents = async(res, body) => {
+    body = JSON.parse(body);
+    body = body.data;
 
-//     // this.deleteAll(res);
+    // clear list
+    try {
+        students = await db.remove({})
+    } catch (err) {
+        return Helpers.handleError(res, { msg: 'error at delete all on put global' }, 404)
+    }
 
-//     try {
-//         body.forEach(async(stud) => {
-//             console.log(stud);
-//             await this.insertStudent(res, stud);
-//         });
-//     } catch (err) {
-//         return Helpers.handleError(res, { msg: 'Error at PUT for more students' }, 500)
-//     }
+    try {
+        body.forEach(async(stud) => {
+            await customInsertStud(stud);
+        });
+        return Helpers.handleSuccess(res, { data: 'students successfully updated' }, 201)
+    } catch (err) {
+        return Helpers.handleError(res, { msg: 'Error at PUT for more students' }, 500)
+    }
 
-// }
+}
+
+const customInsertStud = async stud => {
+    body = stud;
+
+    const student = new db({
+        name: body.name,
+        email: body.email,
+        registrationNumber: body.registrationNumber,
+        bursary: body.bursary
+    });
+    try {
+        const studentSaved = await student.save((err, response) => {
+            if (err) throw err;
+        });
+    } catch (err) {
+        return Helpers.handleError(res, { msg: err }, 500)
+    }
+}

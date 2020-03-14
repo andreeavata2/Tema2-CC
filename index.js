@@ -4,11 +4,6 @@ const PORT = process.env.PORT || 5000;
 const mongoose = require("mongoose");
 const Helpers = require("./Helpers")
 
-// mongodb+srv://andreea:<password>@cluster0-80i2a.mongodb.net/test?retryWrites=true&w=majority
-// andreea
-// fGNBfKIWEHc2EKcl6
-
-
 mongoose.connect('mongodb+srv://andreea:fGNBfKIWEHc2EKcl@cluster0-80i2a.mongodb.net/test?retryWrites=true&w=majority/Students2', {
     useNewUrlParser: true,
     useUnifiedTopology: true
@@ -44,14 +39,10 @@ http.createServer(async(req, res) => {
                 let body = {};
                 body = await Helpers.transformBodyToString(req)
                 studentsController.putUpdate(res, body, id);
-                // } else if (req.url === '/students' || req.url === '/students/') {
-                //     //delete la toat atabela
-                //     // studentsController.deleteAll(res);
-                //     let body = {};
-                //     body = await Helpers.transformBodyToString(req);
-                //     // console.log(body);
-                //     // studentsController.putAllStudents(res, body);
-
+            } else if (req.url === '/students' || req.url === '/students/') {
+                let body = {};
+                body = await Helpers.transformBodyToString(req);
+                studentsController.putAllStudents(res, body);
             } else {
                 Helpers.handleError(res, { msg: 'Route not found for PUT' }, 404)
             }
@@ -74,7 +65,6 @@ http.createServer(async(req, res) => {
             if (req.url.match(/\/students\/([0-9a-z]+)/)) {
                 const id = req.url.match(/\/students\/([0-9a-z]+)/)[1];
                 studentsController.deleteStudentById(res, id);
-                // Helpers.handleSuccess(res, { msg: 'Student delete successfully' }, 200)
             } else if (req.url === '/students') {
                 studentsController.deleteAll(res);
             } else {
